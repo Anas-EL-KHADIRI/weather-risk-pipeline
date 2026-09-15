@@ -19,6 +19,22 @@ df["precipitation_category"] = df["precipitation"].apply(
 )
 
 
+def temperature_category(temp):
+    if temp < 10:
+        return "Cold"
+    elif temp <= 30:
+        return "Normal"
+    elif temp <= 35:
+        return "Hot"
+    else:
+        return "Extreme"
+
+df["temp_category"] = df["temperature_max"].apply(
+    temperature_category
+)
+
+
+
 def wind_category(wind):
     if wind < 30:
         return "low"
@@ -141,17 +157,47 @@ def risk_level(score):
 df["risk_level"] = df["risk_score"].apply(risk_level)
 
 
-print(
-    df[
-        [
-            "city",
-            "date",
-            "rain_risk",
-            "wind_risk",
-            "temperature_risk",
-            "weather_code_risk",
-            "risk_score",
-            "risk_level"
-        ]
-    ].tail(20)
+# Gold data quality checks
+
+missing_risk = df[
+    ["rain_risk", "wind_risk", "temperature_risk",
+     "weather_code_risk", "risk_score", "risk_level"]
+].isna().sum().sum()
+
+invalid_risk_score = (
+    (df["risk_score"] < 0) |
+    (df["risk_score"] > 100)
+).sum()
+
+duplicates = df.duplicated(
+    subset=["city", "date"]
+).sum()
+
+valid_categories = (
+    df["precipitation_category"].isin(
+        ["none", "low", "moderate", "high", "extreme"]
+    ).all()
+    and
+    df["temp_category"].isin(
+        ["Cold", "Normal", "Hot", "Extreme"]
+    ).all()
+    and
+    df["wind_category"].isin(
+        ["low", "moderate", "high", "extreme"]
+    ).all()
 )
+
+if (
+    missing_risk == 0
+    and invalid_risk_score == 0
+    and duplicates == 0
+    and valid_categories
+):
+    print("Gold data quality checks passed.")
+
+    df.to_csv("../gold/weather_gold.csv", index=False)
+
+    print("Gold data exported.")
+else:
+    print("Gold data quality checks failed.")
+    print("Gold data was NOT exported.")
