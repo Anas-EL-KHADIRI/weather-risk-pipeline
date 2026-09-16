@@ -3,3 +3,7 @@ bronze/raw_data.json
 silver/weather_clean.csv
 .env
 gold/weather_gold.csv
+
+__pycache__/
+*.pyc
+tempCodeRunnerFile.py
