@@ -1,21 +1,26 @@
 #type: ignore
-import pandas as pd
-from sqlalchemy import select
-from sqlalchemy.orm import Session
-from database import engine
-from models import City
+def load_cities():
+    import pandas as pd
+    from sqlalchemy import select
+    from sqlalchemy.orm import Session
+    from load.database import engine
+    from load.models import City
+    import os
 
-cities = pd.read_csv("../extraction/ma.csv")
-cities = cities[["city", "lat", "lng"]]
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-with Session(engine) as session:
-    for _, row in cities.iterrows():
-        city = City(
-            city_name=row["city"],
-            latitude=row["lat"],
-            longitude=row["lng"]
-        )
 
-        session.add(city)
+    cities = pd.read_csv(f"{SCRIPT_DIR}/../extraction/ma.csv")
+    cities = cities[["city", "lat", "lng"]]
 
-    session.commit()
+    with Session(engine) as session:
+        for _, row in cities.iterrows():
+            city = City(
+                city_name=row["city"],
+                latitude=row["lat"],
+                longitude=row["lng"]
+            )
+
+            session.add(city)
+
+        session.commit()

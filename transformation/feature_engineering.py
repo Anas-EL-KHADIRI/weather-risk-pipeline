@@ -110,8 +110,6 @@ def feature():
         temperature_risk
     )
 
-    # print(df.loc[df["city"] == "Taroudannt", ["temperature_max", "temperature_risk"]])
-
 
     def weather_code_risk(code):
         if code in [0, 1]:
@@ -141,10 +139,10 @@ def feature():
 
 
     df["risk_score"] = (
-        df["rain_risk"] * 0.40
+        df["rain_risk"] * 0.35
         + df["wind_risk"] * 0.30
-        + df["temperature_risk"] * 0.15
-        + df["weather_code_risk"] * 0.15
+        + df["temperature_risk"] * 0.25
+        + df["weather_code_risk"] * 0.10
     ).round(2)
 
     def risk_level(score):
@@ -161,7 +159,7 @@ def feature():
     df["risk_level"] = df["risk_score"].apply(risk_level)
 
 
-    # Gold data quality checks
+    #gold data quality check
 
     missing_risk = df[
         ["rain_risk", "wind_risk", "temperature_risk",
@@ -194,14 +192,16 @@ def feature():
     if (
         missing_risk == 0
         and invalid_risk_score == 0
-        and duplicates == 0
         and valid_categories
     ):
+        if duplicates != 0:
+            df = df.drop_duplicates(subset=["city", "date"])
+            print(f"{duplicates} duplicates removed")
         print("Gold data quality checks passed.")
 
         df.to_csv(f"{SCRIPT_DIR}/../gold/weather_gold.csv", index=False)
 
         print("Gold data exported.")
     else:
-        print("Gold data quality checks failed.")
-        print("Gold data was NOT exported.")
+        print("Gold data quality checks failed")
+        print("Gold data was NOT exported")

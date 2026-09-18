@@ -13,12 +13,13 @@ COPY bronze/ /opt/airflow/bronze/
 COPY silver/ /opt/airflow/silver/
 COPY gold/ /opt/airflow/gold/
 
-COPY .env /opt/airflow/.env
 
 USER root
 
 RUN chown -R airflow:root /opt/airflow/bronze /opt/airflow/silver /opt/airflow/gold
 
 USER airflow
+
+COPY streamlit_app.py /opt/airflow/streamlit_app.py
 
 ENV PYTHONPATH=/opt/airflow

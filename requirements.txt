@@ -3,3 +3,4 @@ requests
 sqlalchemy==1.4.52
 psycopg2-binary
 python-dotenv
+streamlit

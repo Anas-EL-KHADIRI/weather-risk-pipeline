@@ -1,0 +1,59 @@
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: weather-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: weather_cast_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d weather_cast_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  airflow:
+    build: .
+    container_name: weather-airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8081:8080"
+    environment:
+      DB_URL: postgresql://postgres:root@postgres:5432/weather_cast_db
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: root
+      DB_NAME: weather_cast_db
+      AIRFLOW_ADMIN_USERNAME: admin
+      AIRFLOW_ADMIN_PASSWORD: Admin
+    command: airflow standalone
+
+  streamlit:
+    build: .
+    container_name: weather-streamlit
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8501:8501"
+    environment:
+      DB_URL: postgresql://postgres:root@postgres:5432/weather_cast_db
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: root
+      DB_NAME: weather_cast_db
+    entrypoint: []
+    command: streamlit run streamlit_app.py --server.address=0.0.0.0
+
+volumes:
+  postgres_data:

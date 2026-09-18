@@ -86,16 +86,23 @@ def transform():
 
     if (
         missing_values == 0
-        and duplicates == 0
         and city_date_duplicates == 0
         and invalid_precipitation == 0
         and invalid_probability == 0
         and invalid_temperature == 0
     ):
+
+        if duplicates != 0:
+            df = df.drop_duplicates()
+            print("Duplicates removed")
         print("data quality checks passed")
-        df.to_csv(f"{SCRIPT_DIR}/../silver/weather_clean.csv", index=False)
+        df.to_csv(
+            f"{SCRIPT_DIR}/../silver/weather_clean.csv",
+            index=False
+        )
         print("silver data exported")
     else:
-        print("data quality checks failed\nsilver data was NOT exported")
+        print("data quality checks failed")
+        print("silver data was NOT exported")
 
-    print(df.dtypes)
+        print(df.dtypes)
