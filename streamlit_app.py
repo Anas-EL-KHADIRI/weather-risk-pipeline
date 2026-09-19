@@ -4,7 +4,7 @@ from load.database import engine
 import pandas as pd
 
 st.set_page_config(
-    page_title="Weather Risk Dashboard",
+    page_title="Weather risk dashboard",
     page_icon="🌦️",
     layout="wide"
 )
@@ -117,18 +117,14 @@ city_avg_risk = city_risk_data["risk_score"].mean()
 
 city_max_risk = city_risk_data["risk_score"].max()
 
-city_risk_level = (
-    city_risk_data["risk_level"]
-    .mode()
-    )
+city_risk_level = (city_risk_data["risk_level"].mode())
+
 city_rain_risk= data["rain_risk"].mean()
+
 city_wind_risk= data["wind_risk"].mean()
+
 city_weather_code_risk=data["weather_code_risk"].mean()
 
-if not city_risk_level.empty:
-    city_risk_level = city_risk_level.iloc[0]
-else:
-    city_risk_level = "N/A"
 
 city_col1.metric(
 "Average risk score",
@@ -168,9 +164,10 @@ selected_cities = st.multiselect(
 
 dates = pd.read_sql(
     """
-    SELECT DISTINCT forecast_date
+    SELECT forecast_date
     FROM weatherforecasts
     WHERE forecast_date IS NOT NULL
+	group by forecast_date
     ORDER BY forecast_date
     """,
     engine
@@ -181,7 +178,6 @@ dates["forecast_date"] = pd.to_datetime(
     errors="coerce"
 )
 
-dates = dates.dropna(subset=["forecast_date"])
 
 min_date = dates["forecast_date"].min().date()
 max_date = dates["forecast_date"].max().date()
